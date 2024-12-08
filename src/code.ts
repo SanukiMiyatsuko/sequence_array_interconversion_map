@@ -100,17 +100,12 @@ export function trans_sta(alpha: number[]): RT {
         }
         return null;
     }
-    const pAlpha = alpha.map((_,i) => parent(i));
-    const ap: number[][] = [];
-    let j = 0;
-    for (let i = 1; i < alpha.length; i++) {
-        if (pAlpha[i] === null) {
-            ap.push(alpha.slice(j,i));
-            j = i;
-        }
+    let i = 1;
+    while (i < alpha.length) {
+        if (parent(i) === null) break;
+        i += 1;
     }
-    ap.push(alpha.slice(j));
-    if (ap.length > 1) return ap.map(x => trans_sta(x)).reduce((a,b) => plus(a,b));
+    if (i < alpha.length) return plus(trans_sta(alpha.slice(0,i)),trans_sta(alpha.slice(i)));
     if (alpha.length === 1) return psi(alpha[0],Z);
     const a = alpha[0];
     const b = trans_sta(alpha.slice(1).map(x => x-(a+1)));
