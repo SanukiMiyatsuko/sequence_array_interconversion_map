@@ -1,6 +1,7 @@
-import { RT, RPT, RAT, Z, ONE, sanitize_plus_term, OMEGA, LOMEGA, psi } from "./code";
+import { RT, RPT, Z, ONE, sanitize_plus_term, OMEGA, LOMEGA, psi } from "./code";
 
-function from_nat(num: number): RPT | RAT {
+function from_nat(num: number): RT {
+    if (num === 0) return Z;
     const numterm: RPT[] = [];
     while (num > 0) {
         numterm.push(ONE);
@@ -43,7 +44,7 @@ export class Scanner {
 
     consumeStrHead(): boolean {
         const ch = this.str[this.pos];
-        if (ch !== "ψ" && ch !== "p") return false;
+        if (/^[<>[\]1234567890ωΩwW{}_()]$/.test(ch)) return false;
         this.pos += 1;
         return true;
     }
@@ -78,27 +79,14 @@ export class Scanner {
             return Z;
         } else {
             let list: RPT[] = [];
-            if (is_numchar(this.str[this.pos])) {
-                // 0以外の数字にマッチ
-                const num = this.parse_number();
-                const fn = from_nat(num);
-                if (fn.type === "plus") list = fn.add;
-                else list.push(fn);
-            } else {
-                const first = this.parse_principal();
-                list.push(first);
-            }
-            while (this.consume("+")) {
-                let term: RAT | RPT;
-                if (is_numchar(this.str[this.pos])) {
-                    const num = this.parse_number();
-                    term = from_nat(num);
-                } else {
-                    term = this.parse_principal();
-                }
-                if (term.type === "plus") list = list.concat(term.add);
+            do {
+                let term: RT;
+                if (is_numchar(this.str[this.pos])) term = from_nat(this.parse_number());
+                else term = this.parse_principal();
+                if (term.type === "zero") throw Error(`0は+で接続できません`);
+                else if (term.type === "plus") list = list.concat(term.add);
                 else list.push(term);
-            }
+            } while (this.consume("+"));
             return sanitize_plus_term(list);
         }
     }
@@ -116,11 +104,15 @@ export class Scanner {
             if (this.consumeStrHead()) {
                 if (this.consume("(")) {
                     if (is_numchar(this.str[this.pos])) {
+                        const position = this.pos;
+                        const arg = this.parse_term();
+                        if (this.consume(")")) return psi(0,arg);
+                        this.pos = position;
                         sub = this.parse_number();
                         this.expect(",");
                     } else {
                         const arg = this.parse_term();
-                        this.expect(")")
+                        this.expect(")");
                         return psi(0,arg);
                     }
                 } else {
@@ -137,11 +129,15 @@ export class Scanner {
             } else {
                 if (this.consume("(")) {
                     if (is_numchar(this.str[this.pos])) {
+                        const position = this.pos;
+                        const arg = this.parse_term();
+                        if (this.consume(")")) return psi(0,arg);
+                        this.pos = position;
                         sub = this.parse_number();
                         this.expect(",");
                     } else {
                         const arg = this.parse_term();
-                        this.expect(")")
+                        this.expect(")");
                         return psi(0,arg);
                     }
                 } else {

@@ -61,7 +61,7 @@ function App() {
           配列の入力は、ψ(a,b), ψ_&#123;a&#125;(b)の形式で行ってください。<br />
           _, &#123;, &#125;は省略可能です。<br />
           略記として、1 := ψ(0), n := 1 + 1 + ...(n個の1)... + 1, ω := ψ(1), Ω := ψ(1,0)が使用可能。<br />
-          また、ψはpで、ωはwで、ΩはWで代用可能。
+          また、ψは他の一文字で、ωはwで、ΩはWで代用可能。
         </p>
         A:
         <input
@@ -81,7 +81,7 @@ function App() {
           <ul>
             <li><label className="checkbox">
               <input type="checkbox" checked={options.checkOnOffo} onChange={() => handleCheckboxChange('checkOnOffo')} />
-              &nbsp;ψ_0(1)をωで出力
+              &nbsp;ψ{options.checkOnOffB ? `(1)` : `${options.checkOnOffA ? `_0(1)` : `(0,1)`}`}をωで出力
             </label></li>
             <li><label className="checkbox">
               <input type="checkbox" checked={options.checkOnOffO} onChange={() => handleCheckboxChange('checkOnOffO')} />
